@@ -1,0 +1,12 @@
+# Environment variables
+.env
+
+# Vector DB / embeddings cache
+data/
+
+# Upload files
+uploads/
+
+# IDE
+.vscode/
+.idea/

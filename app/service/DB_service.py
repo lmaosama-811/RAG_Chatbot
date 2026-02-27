@@ -21,6 +21,9 @@ class DBService:
     def get_list_conversation(self,db):
         cmd = select(ConversationHistory.session_id,ConversationHistory.session_name)
         return db.exec(cmd).all()
+    def get_conversation(self,session_id,db):
+        cmd = select(ConversationHistory).where(ConversationHistory.session_id==session_id)
+        return db.exec(cmd).first() #ConversationHistory|None 
     def create_summary(self,covered_until_message_id,content,db): #summary table
         new_summary = Summary(covered_until_message_id=covered_until_message_id,content=content)
         db.add(new_summary)

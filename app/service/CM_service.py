@@ -1,6 +1,8 @@
 from .LLM_service import llm_service
 from .DB_service import db_service
 
+import uuid 
+
 class ConversationManagement:
     def __init__(self):
         self.summarization = {"role":"system"}
@@ -23,6 +25,8 @@ class ConversationManagement:
                 db_service.create_summary(i+1,summary,db)
                 break 
         return recent_dialogs, {**self.summarizaton,**{"content":summary}} # list[role,content] and role,content
+    def generate_session_id(self):
+        return uuid.uuid4().hex[:16]
     
 CM_service = ConversationManagement()
         

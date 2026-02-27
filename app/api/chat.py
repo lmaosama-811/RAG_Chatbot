@@ -18,7 +18,8 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 @router.post("",response_model=Union[ChatBotResponse,Message])
 def chat(request: ChatbotRequest, db: Session = Depend(get_session)):
     """Select the file you would like the chatbot to retrieve information from (by entering file ID), and enter the question you wish to ask.\n
-    You can check whether the file exists and file ID by Get Files"""
+    You can check whether the file exists and file ID by Get Files
+    Session name is automatically set to session ID."""
     if not check_file_available(request.file_id):
         return Message(message="File not Found")
     if not check_session_id_available(request.session_id,db):
@@ -27,6 +28,8 @@ def chat(request: ChatbotRequest, db: Session = Depend(get_session)):
     file =pdf_service.process_pdffile(request.file_id) 
     context = rag_service.load_pdf(request.file_id,file,embeddings,request.question) #Get k chunks
     #create dialog for role user in table 
+    uset_content = llm_service.format_prompt(
+    db_service.create_dialog(session_id,session_id,"user",
     output = llm_service.ask_model(task="question_answer",llm=llm,context=context,question=request.question)
     #create dialog for role assistant in table 
     return ChatBotResponse(model_name="GPT-4o",answer=output.content,count=len(output.content.split())) #Adjust this 

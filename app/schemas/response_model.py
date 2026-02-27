@@ -9,5 +9,7 @@ class Error(BaseModel):
 
 class ChatBotResponse(BaseModel):
     model_name: str
+    session_id: int
+    session_name: str
     answer: str
     count: int = Field(gt=0)

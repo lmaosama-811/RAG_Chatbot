@@ -1,24 +1,27 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depend
 from typing import Union
+from sqlmodel import Session
 
-from ..schemas.request_model import *
-from ..schemas.response_model import *
+from ..schemas.request_model import ChatbotRequest
+from ..schemas.response_model import ChatBotResponse, Message
+
 from ..model import embeddings, llm
 from ..service.RAG_service import rag_service
 from ..service.LLM_service import llm_service
 from ..service.PDF_service import pdf_service
 from ..deps import check_file_available
+from ..db import get_session
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 @router.post("",response_model=Union[ChatBotResponse,Message])
-def chat(request: ChatbotRequest):
-    """Select the file you would like the chatbot to retrieve information from (by entering file name), and enter the question you wish to ask.\n
-    You can check whether the file exists by Get Files"""
-    if check_file_available(request.file_name) is None:
+def chat(request: ChatbotRequest, db: Session = Depend(get_session)):
+    """Select the file you would like the chatbot to retrieve information from (by entering file ID), and enter the question you wish to ask.\n
+    You can check whether the file exists and file ID by Get Files"""
+    if not check_file_available(request.file_id):
         return Message(message="File not Found")
-    file = pdf_service.get_file(request.file_name)
-    context = rag_service.load_pdf(file,embeddings,request.question)
-    output = llm_service.ask_model(context,request.question,llm)
+    file =pdf_service.process_pdffile(request.file_id) 
+    context = rag_service.load_pdf(request.file_id,file,embeddings,request.question) #Get k chunks
+    output = llm_service.ask_model(task="question_answer",llm=llm,context=context,question=request.question)
     return ChatBotResponse(model_name="GPT-4o",answer=output.content,count=len(output.content.split()))
 

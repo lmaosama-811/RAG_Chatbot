@@ -23,8 +23,7 @@ def chat(request: ChatbotRequest, db: Session = Depend(get_session)):
         return Message(message="File not Found")
     if not check_session_id_available(request.session_id,db):
         return Message(message="Session ID not Found")
-    if request.session_id is None:
-        pass #create random session_id in CM_service 
+    session_id = (CM_service.generate_session_id() if request.session_id is None else request.session_id)
     file =pdf_service.process_pdffile(request.file_id) 
     context = rag_service.load_pdf(request.file_id,file,embeddings,request.question) #Get k chunks
     #create dialog for role user in table 

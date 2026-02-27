@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from sqlmodel import SQLModel, Field
 
 class ChatbotRequest(BaseModel):
-    session_id: int
+    session_id: int|None=None
     file_id: str
     question: str 
 

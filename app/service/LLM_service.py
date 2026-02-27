@@ -11,10 +11,10 @@ class LLMService:
                 raw_content = f.read() 
             if task == "question_answer": 
                 user_content = (raw_content.replace("<<CONTEXT>>", context).replace("<<QUESTION>>", question)) 
-                prompt = [self.system_message[task]] + [{"role":"","content":user_content}]
+                prompt = [self.system_message[task]] + conversation_history + [{"role":"","content":user_content}]
             else: 
                 user_content = (raw_content.replace("<<MESSAGES>>",conversation_history).replace("<<OLDSUMMARY>>",old_summary))
-                prompt = [self.system_message[task]] + [{"role":"","content":user_content}]
+                prompt = [self.system_message[task]] + [{"role":"user","content":user_content}]
             try: 
                 return llm.invoke(prompt) 
             except TimeoutError: 

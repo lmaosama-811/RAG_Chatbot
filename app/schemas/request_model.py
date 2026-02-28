@@ -17,5 +17,6 @@ class ConversationHistory(SQLModel, table=True):
 class Summary(SQLModel,table=True):
     __tablename__="summary"
     id: int|None = Field(default=None,primary_key=True)
+    session_id: str 
     covered_until_message_id: int
     content: str 

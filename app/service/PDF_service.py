@@ -12,7 +12,8 @@ class PDFService:
 
     def save_file(self,file_bytes, file_name):
         file_id = uuid.uuid4().hex #.uuid4() create random UUID, .hex() convert it into 32-character string 
-        new_filename = f"{file_id}_{file_name}"
+        safe_name = os.path.basename(file_name)
+        new_filename = f"{file_id}_{safe_name}"
         file_path = os.path.join(self.upload_dir,new_filename)
         with open(file_path,"wb") as f:
             f.write(file_bytes)
@@ -20,7 +21,7 @@ class PDFService:
     
     def get_file_path(self,folder,file_id):
         base_dir = self.upload_dir if folder == "upload" else self.indexes_dir
-        files = [f for f in os.listdir(base_dir) if file_id in f]
+        files = [f for f in os.listdir(base_dir) if f.startswith(f"{file_id}_")]
         if not files:
             return os.path.join(base_dir, file_id)
         return os.path.join(base_dir, files[0]) 

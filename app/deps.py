@@ -10,7 +10,4 @@ def check_file_type(file):
     return file.filename.lower().endswith(".pdf")
 
 def check_session_id_available(session_id,db):
-    if session_id is None:
-        return True   # cho phép tạo session mới
-    conversation = db_service.get_conversation(session_id, db)
-    return conversation is not None
+    return db_service.get_conversation(session_id, db) is not None 

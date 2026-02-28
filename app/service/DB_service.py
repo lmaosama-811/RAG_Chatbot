@@ -31,8 +31,10 @@ class DBService:
         new_summary = Summary(covered_until_message_id=covered_until_message_id,content=content)
         db.add(new_summary)
         db.commit()
-    def get_last_summary(self,db): #summary table
-        cmd = select(Summary).order_by(desc(Summary.id)).limit(1)
-        return db.exec(cmd).first() #return Summary 
+    def get_last_summary(self, session_id, db):
+        cmd = select(Summary).where(Summary.session_id == session_id)\
+                            .order_by(desc(Summary.id))\
+                            .limit(1)
+        return db.exec(cmd).first()
 
 db_service = DBService()

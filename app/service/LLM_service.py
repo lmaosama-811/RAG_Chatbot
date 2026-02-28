@@ -13,7 +13,7 @@ class LLMService:
                 return (raw_content.replace("<<CONTEXT>>",context).replace("<<QUESTION>>",question))
             return (raw_content.replace("<<MESSAGES>>",conversation_history).replace("<<OLDSUMMARY>>",old_summary))
         
-    def ask_model(self,llm,user_content,conversation_history=[]):
+    def ask_model(self,llm,task,user_content,conversation_history=[]):
             prompt = [self.system_message[task]] + conversation_history + [{"role":"","content":user_content}]
             try: 
                 return llm.invoke(prompt) 

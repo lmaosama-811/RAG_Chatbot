@@ -6,6 +6,9 @@ class DBService:
     def get_conversation_history(self,session_id:int, db):
         cmd = select(ConversationHistory.role, ConversationHistory.content).where(ConversationHistory.session_id == session_id)
         return db.exec(cmd).all() #return tuple as we selecting columns
+    def get_last_dialog(self,session_id,db)-> ConversationHistory|None:
+        cmd = select(ConversationHistory).where(ConversationHistory.session_id == session_id).order_by(desc(ConversationHistory.id)).limit(1)
+        return db.exec(cmd).first()
     def create_dialog(self, session_id, session_name, role, content,db):
         new_diaglog = ConversationHistory(session_id=session_id,session_name=session_name,role=role,content=content)
         db.add(new_diaglog)

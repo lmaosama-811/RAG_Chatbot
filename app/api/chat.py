@@ -28,7 +28,7 @@ def chat(request: ChatbotRequest, db: Session = Depend(get_session)):
     file =pdf_service.process_pdffile(request.file_id) 
     context = rag_service.load_pdf(request.file_id,file,embeddings,request.question) #Get k chunks
     #create dialog for role user in table 
-    uset_content = llm_service.format_prompt("question_answer",context,request)
+    uset_content = llm_service.format_uset_content("question_answer",context,request)
     db_service.create_dialog(session_id,session_id,"user",user_content)
     output = llm_service.ask_model(task="question_answer",llm=llm,context=context,question=request.question)
     #create dialog for role assistant in table 

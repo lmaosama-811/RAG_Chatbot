@@ -16,7 +16,7 @@ class ConversationManagement:
         dialogs = (all_dialogs if index is None else all_dialogs[index-1:index+5])
         count = 0
         recent_dialogs = []
-        for i in range(len(dialogs),-1,-1):
+        for i in range(len(dialogs)-1,-1,-1):
             if (count + len(dialogs[i][1].split())+3) <= self.token_threshold:
                 recent_dialogs.append(self.format_history(dialogs[i]))
                 count += (len(dialogs[i][1].split()) + 3)
@@ -28,7 +28,7 @@ class ConversationManagement:
                     user_content = llm_service.format_user_content(task="summarization",conversation_history=sum_list,old_summary=old_summary)
                     summary = llm_service.ask_model(llm,"summarization",user_content)
                     db_service.create_summary(i+1,summary,db) #base 1 according to table 
-                    return [{**self.summarizaton,**{"content":summary}}] + recent_dialogs # list[role,content]: đoạn được summary và recent_dialogs 
+                    return [{**self.summarization,**{"content":summary}}] + recent_dialogs # list[role,content]: đoạn được summary và recent_dialogs 
         return recent_dialogs #list(role,content)
     
     def analyze_conversation_history(self,session_id,db,llm): #return history conversation list[dict(role,content)]

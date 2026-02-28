@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depend
+from fastapi import APIRouter, Depends
 from typing import Union
 from sqlmodel import Session
 
@@ -17,7 +17,7 @@ from ..db import get_session
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 @router.post("",response_model=Union[ChatBotResponse,Message])
-def chat(request: ChatbotRequest, db: Session = Depend(get_session)):
+def chat(request: ChatbotRequest, db: Session = Depends(get_session)):
     """Select the file you would like the chatbot to retrieve information from (by entering file ID), and enter the question you wish to ask.\n
     You can check whether the file exists and file ID by Get Files\n
     Session name is automatically set to session ID."""
@@ -31,10 +31,10 @@ def chat(request: ChatbotRequest, db: Session = Depend(get_session)):
     #Load conversation history 
     conversation_history = CM_service.analyze_conversation_history(session_id,db,llm)
     #create dialog for role user in table 
-    user_content = llm_service.format_user_content("question_answer",context,request)
+    user_content = llm_service.format_user_content("question_answer",context,request.question)
     db_service.create_dialog(session_id,session_id,"user",user_content,db)
     output = llm_service.ask_model(llm,"question_answer",user_content,conversation_history)
     #create dialog for role assistant in table 
-    db_service.create_dialog(session_id,session_id,"assistant",output,db)
+    db_service.create_dialog(session_id,session_id,"assistant",output.content,db)
     return ChatBotResponse(model_name="GPT-4o",session_id=session_id,session_name=session_id,answer=output.content,count=len(output.content.split())) 
 

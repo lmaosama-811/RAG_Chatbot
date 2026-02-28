@@ -9,7 +9,7 @@ class ChatbotRequest(BaseModel):
 class ConversationHistory(SQLModel, table=True):
     __tablename__="conversation_history"
     id:int|None = Field(default=None, primary_key=True)
-    session_id: int
+    session_id: str
     session_name: str|None = None
     role: str
     content: str 

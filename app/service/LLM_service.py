@@ -1,7 +1,7 @@
 from fastapi import HTTPException 
 import logging 
 
-logger = logging.getLogger
+logger = logging.getLogger(__name__)
 
 class LLMService: 
     def __init__(self): 

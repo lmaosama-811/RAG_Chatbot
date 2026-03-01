@@ -23,7 +23,7 @@ def chat(request: ChatbotRequest, db: Session = Depends(get_session)):
     Session name is automatically set to session ID."""
     if not check_file_available(request.file_id):
         return Message(message="File not Found")
-    if not check_session_id_available(request.session_id,db):
+    if request.session_id is not None and not check_session_id_available(request.session_id,db):
         return Message(message="Session ID not Found")
     session_id = (CM_service.generate_session_id() if request.session_id is None else request.session_id)
     file =pdf_service.process_pdffile(request.file_id) 
@@ -32,9 +32,14 @@ def chat(request: ChatbotRequest, db: Session = Depends(get_session)):
     conversation_history = CM_service.analyze_conversation_history(session_id,db,llm)
     #create dialog for role user in table 
     user_content = llm_service.format_user_content("question_answer",context,request.question)
-    db_service.create_dialog(session_id,session_id,"user",user_content,db)
     output = llm_service.ask_model(llm,"question_answer",user_content,conversation_history)
-    #create dialog for role assistant in table 
-    db_service.create_dialog(session_id,session_id,"assistant",output.content,db)
+    try: 
+        db_service.create_dialog(session_id,session_id,"user",user_content,db)
+        #create dialog for role assistant in table 
+        db_service.create_dialog(session_id,session_id,"assistant",output.content,db)
+    except:
+        db.rollback()
+        raise
     return ChatBotResponse(model_name="GPT-4o",session_id=session_id,session_name=session_id,answer=output.content,count=len(output.content.split())) 
+    
 

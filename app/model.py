@@ -17,10 +17,9 @@ embeddings = OpenAIEmbeddings(
 )
 
 llm = ChatOpenAI(
-    model="openai/gpt-4o",
+    model="gpt-4o",
     api_key= settings.api_key,
     base_url="https://openrouter.ai/api/v1",
     temperature=0.7,
     max_tokens=1000
 )
-

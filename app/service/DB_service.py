@@ -1,8 +1,12 @@
-from sqlmodel import select,text,update, delete,desc
+from sqlmodel import select,update, delete,desc
 
 from ..schemas.request_model import ConversationHistory, Summary
 
 class DBService:
+    def clean_text(self,text: str) -> str:
+        if text is None:
+            return text
+        return text.replace("\x00", "")
     def get_conversation_history(self,session_id:int, db):
         cmd = select(ConversationHistory.role, ConversationHistory.content).where(ConversationHistory.session_id == session_id)
         return db.exec(cmd).all() #return tuple as we selecting columns
@@ -10,7 +14,8 @@ class DBService:
         cmd = select(ConversationHistory).where(ConversationHistory.session_id == session_id).order_by(desc(ConversationHistory.id)).limit(1)
         return db.exec(cmd).first()
     def create_dialog(self, session_id, session_name, role, content,db):
-        new_diaglog = ConversationHistory(session_id=session_id,session_name=session_name,role=role,content=content)
+        clean_content = self.clean_text(content)
+        new_diaglog = ConversationHistory(session_id=session_id,session_name=session_name,role=role,content=clean_content)
         db.add(new_diaglog)
         db.commit()
     def update_dialog_name(self,session_id,new_name,db):
@@ -28,7 +33,8 @@ class DBService:
         cmd = select(ConversationHistory).where(ConversationHistory.session_id==session_id)
         return db.exec(cmd).first() #ConversationHistory|None 
     def create_summary(self,covered_until_message_id,content,db): #summary table
-        new_summary = Summary(covered_until_message_id=covered_until_message_id,content=content)
+        clean_content = self.clean_text(content)
+        new_summary = Summary(covered_until_message_id=covered_until_message_id,content=clean_content)
         db.add(new_summary)
         db.commit()
     def get_last_summary(self, session_id, db):

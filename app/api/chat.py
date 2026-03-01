@@ -43,7 +43,7 @@ def chat(request: Request,query: ChatbotRequest, db: Session = Depends(get_sessi
     def event_generator():
         try:
             full_response = ""
-            for token in llm_service.ask_model(llm,"question_answer",user_content,conversation_history):
+            for token in llm_service.stream_model(llm,"question_answer",user_content,conversation_history):
                 full_response += token
                 yield token
         finally:

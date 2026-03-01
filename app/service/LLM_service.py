@@ -1,7 +1,7 @@
 from fastapi import HTTPException 
 import logging 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger
 
 class LLMService: 
     def __init__(self): 
@@ -26,11 +26,20 @@ class LLMService:
             prompt = [self.system_message[task]] + conversation_history + [{"role":"user","content":user_content}]
             try: 
                 logger.info("Calling LLM")
-                logger.info("Generating...")
-                for chunk in llm.stream(prompt):
-                     if chunk.content:
-                          yield chunk.content 
+                response = llm.invoke(prompt)
+                logger.info("LLM generated")
+                return response
             except TimeoutError: 
                 raise HTTPException(504,"LLM timeout") 
+    def stream_model(self, llm, task, user_content, conversation_history=None):
+
+        if conversation_history is None:
+            conversation_history = []
+
+        prompt = [self.system_message[task]] + conversation_history + [{"role": "user", "content": user_content}]
+
+        for chunk in llm.stream(prompt):
+            if chunk.content:
+                yield chunk.content
             
 llm_service = LLMService()

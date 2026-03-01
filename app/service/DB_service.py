@@ -18,7 +18,7 @@ class DBService:
         new_diaglog = ConversationHistory(session_id=session_id,session_name=session_name,role=role,content=clean_content)
         db.add(new_diaglog)
         db.commit()
-    def update_dialog_name(self,session_id,new_name,db):
+    def update_session_name(self,session_id,new_name,db):
         cmd = update(ConversationHistory.session_name).where(ConversationHistory.session_id==session_id).values(session_name=new_name)
         db.exec(cmd)
         db.commit()

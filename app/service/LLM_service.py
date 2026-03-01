@@ -1,9 +1,12 @@
 from fastapi import HTTPException 
+import logging 
+
+logger = logging.getLogger(__name__)
 
 class LLMService: 
     def __init__(self): 
-        self.system_message = {"summarization":{"role":"system","content":"You are a talent summarization assistant"}, 
-                               "question_answer":{"role":"system","content":"You are a talent question answering assistant"}} 
+        self.system_message = {"summarization":{"role":"system","content":"You are a summarization AI assistant"}, 
+                               "question_answer":{"role":"system","content":"You are a retrieval-augmented AI assistant"}} 
     def format_user_content(self,task,context=None,question=None,conversation_history = None,old_summary=None):
             if task not in self.system_message: 
                 raise HTTPException(400,"Chatbot doesn't support this task") 
@@ -22,7 +25,11 @@ class LLMService:
                  conversation_history = []
             prompt = [self.system_message[task]] + conversation_history + [{"role":"user","content":user_content}]
             try: 
-                return llm.invoke(prompt)
+                logger.info("Calling LLM")
+                logger.info("Generating...")
+                for chunk in llm.stream(prompt):
+                     if chunk.content:
+                          yield chunk.content 
             except TimeoutError: 
                 raise HTTPException(504,"LLM timeout") 
             

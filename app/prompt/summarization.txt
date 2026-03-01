@@ -1,8 +1,16 @@
-Summarization Task:
-Update this old summary with followings messages
+Update the existing summary by incorporating the new messages.
 
-Old summary:
+Instructions:
+- Retain important information from the old summary.
+- Integrate key points from the new messages.
+- Remove redundancy.
+- Keep the updated summary concise and coherent.
+- Do not repeat unchanged details unnecessarily.
+
+Old Summary:
 <<OLDSUMMARY>>
 
-Messages:
+New Messages:
 <<MESSAGES>>
+
+Updated Summary:

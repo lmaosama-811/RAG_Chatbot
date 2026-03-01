@@ -1,14 +1,6 @@
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class Settings(BaseSettings):
-    api_key:str
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8"
-    ) #Pydantic v2
-
-settings = Settings()
+from .core.env_config import settings
 
 embeddings = OpenAIEmbeddings(
     model="openai/text-embedding-3-small",
@@ -17,9 +9,10 @@ embeddings = OpenAIEmbeddings(
 )
 
 llm = ChatOpenAI(
-    model="gpt-4o",
+    model="openai/gpt-4o",
     api_key= settings.api_key,
     base_url="https://openrouter.ai/api/v1",
-    temperature=0.7,
-    max_tokens=1000
+    temperature=settings.temperature,
+    max_tokens=1000,
+    streaming=True #turn on streaming
 )

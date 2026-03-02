@@ -4,7 +4,7 @@ from sqlmodel import Session
 import logging
 
 from ..schemas.request_model import ChatbotRequest
-from ..schemas.response_model import Message
+from ..schemas.response_model import Message, ChatBotResponse 
 
 from ..model import embeddings, llm
 from ..service.RAG_service import rag_service
@@ -39,7 +39,6 @@ def chat(request: Request,query: ChatbotRequest, db: Session = Depends(get_sessi
     conversation_history = CM_service.analyze_conversation_history(session_id,db,llm)
     #create dialog for role user in table 
     user_content = llm_service.format_user_content("question_answer",context,query.question)
-    db_service.create_dialog(session_id,session_id,"user",user_content,db)
     def event_generator():
         try:
             full_response = ""
@@ -48,7 +47,12 @@ def chat(request: Request,query: ChatbotRequest, db: Session = Depends(get_sessi
                 yield token
         finally:
             if full_response:
-                db_service.create_dialog(session_id,session_id,"assistant",full_response,db)
+                try: 
+                    db_service.create_dialog(session_id,session_id,"user",user_content,db)
+                    db_service.create_dialog(session_id,session_id,"assistant",full_response,db)
+                except:
+                    db.rollback()
+                    raise
     logger.info("Chat response generated")
     return StreamingResponse(event_generator(),media_type="text/plain")
     

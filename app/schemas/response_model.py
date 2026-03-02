@@ -12,7 +12,6 @@ class ChatBotResponse(BaseModel):
     session_id: str
     session_name: str
     answer: str
-    count: int = Field(gt=0)
 
 class Session(BaseModel):
     session_id: str 

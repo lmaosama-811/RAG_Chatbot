@@ -1,6 +1,6 @@
 from .LLM_service import llm_service
 from .DB_service import db_service
-from tiktoken import encoding_for_model
+from tiktoken import get_encoding
 import uuid 
 
 class ConversationManagement:
@@ -9,7 +9,7 @@ class ConversationManagement:
         self.token_threshold = 4000
         self.compress_threshold = 5 #24 messages -> compress 
         self.compress_batch = 3 # 5 message each compress 
-        self.encoder = encoding_for_model("gpt-4o")
+        self.encoder = get_encoding("cl100k_base")
     def format_history(self,dialog:tuple): #return conversation history 
         return {"role":dialog[0],"content":dialog[1]}
     def load_conversation_history_and_update_summarization(self,session_id,db,llm,index=None,old_summary=None): #lấy history, nếu vượt threshold thì update summary vào old summary

@@ -28,7 +28,7 @@ class ConversationManagement:
                 if len(sum_list) !=0:
                     user_content = llm_service.format_user_content(task="summarization",conversation_history=sum_list,old_summary=old_summary)
                     summary = llm_service.ask_model(llm,"summarization",user_content)
-                    db_service.create_summary(i+1,summary.content,db) #base 1 according to table 
+                    db_service.create_summary(session_id,i+1,summary.content,db) #base 1 according to table 
                     return [{**self.summarization,**{"content":summary.content}}] + recent_dialogs # list[role,content]: đoạn được summary và recent_dialogs 
         return recent_dialogs #list(role,content)
     
@@ -43,7 +43,7 @@ class ConversationManagement:
             dialogs_for_summary = [self.format_history(d) for d in dialogs_for_summary]
             user_content = llm_service.format_user_content(task="summarization",conversation_history=dialogs_for_summary,old_summary=old_summary)
             summary = llm_service.ask_model(llm,"summarization",user_content)
-            db_service.create_summary(old_summary.covered_until_message_id+1,summary.content,db) #base 1 according to table
+            db_service.create_summary(session_id,old_summary.covered_until_message_id+1,summary.content,db) #base 1 according to table
             return [{"role":"system","content":summary.content}] + self.load_conversation_history_and_update_summarization(session_id,db,llm,old_summary.covered_until_message_id)
 
              

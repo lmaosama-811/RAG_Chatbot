@@ -4,7 +4,7 @@ from sqlmodel import Session
 import logging
 
 from ..schemas.request_model import ChatbotRequest
-from ..schemas.response_model import Message, ChatBotResponse 
+from ..schemas.response_model import Error
 
 from ..model import embeddings, llm
 from ..service.RAG_service import rag_service
@@ -29,12 +29,11 @@ def chat(request: Request,query: ChatbotRequest, db: Session = Depends(get_sessi
     logger.info("Chat request received",extra={"file_id": query.file_id})
     if not check_file_available(query.file_id):
         logger.warning("File not found", extra={"file_id": query.file_id})
-        return Message(message="File not Found")
+        return Error(code=404,error="File not Found")
     if query.session_id is not None and not check_session_id_available(query.session_id,db):
-        return Message(message="Session ID not Found")
+        return Error(code=404,error="Session ID not Found")
     session_id = (CM_service.generate_session_id() if query.session_id is None else query.session_id)
-    file =pdf_service.process_pdffile(query.file_id) 
-    context = rag_service.load_pdf(query.file_id,file,embeddings,query.question) #Get k chunks
+    context = rag_service.load_pdf(query.file_id,embeddings,query.question) #Get k chunks
     #Load conversation history 
     conversation_history = CM_service.analyze_conversation_history(session_id,db,llm)
     #create dialog for role user in table 
@@ -50,8 +49,9 @@ def chat(request: Request,query: ChatbotRequest, db: Session = Depends(get_sessi
                 try: 
                     db_service.create_dialog(session_id,session_id,"user",user_content,db)
                     db_service.create_dialog(session_id,session_id,"assistant",full_response,db)
-                except:
+                except Exception as e:
                     db.rollback()
+                    logger.error(f"{e}")
                     raise
     logger.info("Chat response generated")
     return StreamingResponse(event_generator(),media_type="text/plain")

@@ -20,7 +20,7 @@ class RAGService:
         scored_docs = list(zip(documents,scores)) 
         scored_docs.sort(key=lambda x:x[1], reverse=True) #sort descending
         return [doc for doc,_ in scored_docs[:top_k]] #List[Document]
-    def load_pdf(self,file_id,file,embeddings,question):
+    def load_pdf(self,file_id,embeddings,question):
         logger.info("Start processing PDF", extra={"file_id": file_id})
 
         file_path = pdf_service.get_file_path("indexes",file_id)
@@ -28,6 +28,7 @@ class RAGService:
             vectorstore = FAISS.load_local(file_path, embeddings,allow_dangerous_deserialization=True)
             logger.info("FAISS index loaded successfully")
         else:
+            file = pdf_service.process_pdffile(file_id)
             chunks = self.text_splitter.split_documents(file)
             logger.info("Text split completed",extra={"chunks": len(chunks)})
 

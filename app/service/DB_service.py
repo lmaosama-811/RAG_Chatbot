@@ -32,9 +32,9 @@ class DBService:
     def get_conversation(self,session_id,db):
         cmd = select(ConversationHistory).where(ConversationHistory.session_id==session_id)
         return db.exec(cmd).first() #ConversationHistory|None 
-    def create_summary(self,covered_until_message_id,content,db): #summary table
+    def create_summary(self,session_id:str, covered_until_message_id,content,db): #summary table
         clean_content = self.clean_text(content)
-        new_summary = Summary(covered_until_message_id=covered_until_message_id,content=clean_content)
+        new_summary = Summary(session_id=session_id, covered_until_message_id=covered_until_message_id,content=clean_content)
         db.add(new_summary)
         db.commit()
     def get_last_summary(self, session_id, db):

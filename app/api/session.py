@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends,Path
 from sqlmodel import Session
 import logging 
 
@@ -14,15 +14,15 @@ def get_list_session(db:Session = Depends(get_session)):
     logger.info("Get list session")
     return db_service.get_list_conversation(db)
 
-@router.post("",response_model=Message)
-def update_session_name(session_id:int,new_name:str, db:Session= Depends(get_session)):
+@router.post("/update/{session_id}",response_model=Message):
+def update_session_name(session_id:str=Path(), new_name:str, db:Session= Depends(get_session)):
     logger.info(f"Update session name for {session_id} ")
     db_service.update_session_name(session_id,new_name,db)
     logger.info("Update successfully")
     return Message("Update Successfully")
 
-@router.post("",response_model=Message)
-def delete_session(session_id:str, db:Session = Depends(get_session)):
+@router.delete("/delete/{session_id}",response_model=Message)
+def delete_session(session_id:str=Path(), db:Session = Depends(get_session)):
     logger.info(f"Delete session {session_id}")
     db_service.delete_conversation(session_id,db)
     logger.info("Delete successfully")
